@@ -1,6 +1,28 @@
 import React, { Component } from 'react';
 import SecretSantaContext from '../SecretSantaContext';
 
+function shuffle(userList){
+    let poolOfNames = [];
+    while (userList.length !== 0) {
+        let randomIndex;
+        randomIndex = Math.floor(Math.random() * userList.length);
+        poolOfNames.push(userList[randomIndex]);
+        userList.splice(randomIndex, 1);
+    }
+    return poolOfNames;
+}
+
+const pairWithRight = (right) => (leftItem, i) => {
+    let rightItem = right[i];
+    let leftUser = poolOfNames
+        .find(user => leftItem.id === user.id)
+    let rightUser = poolOfNames
+        .find(user => rightItem.id === user.id)
+
+    leftUser.pairName = rightUser.id;
+    rightUser.pairName = leftUser.id;  
+};
+
 class Pairs extends Component {
 
     static defaultProps = {
@@ -27,39 +49,17 @@ class Pairs extends Component {
             return newObject;
         })
         userList.map(obj => obj.pairName = "")
+        
+        // shuffle enough times to ensure randomness
+        let poolOfNames = shuffle(userList);
+        // ^^^ hide all complexity in there, whether 1 or 7 or 20 shuffle loops
 
-        let poolOfNames = [];
-        while (userList.length !== 0) {
-            let randomIndex;
-            randomIndex = Math.floor(Math.random() * userList.length);
-            poolOfNames.push(userList[randomIndex]);
-            userList.splice(randomIndex, 1);
-        }
+        // split once
         let left = poolOfNames.slice(0, poolOfNames.length / 2);
         let right = poolOfNames.slice(Math.ceil(poolOfNames.length / 2))
 
-        let rightCopy = [...right];
-        let leftCopy = [...left];
-
-        left.forEach((leftItem) => {
-            let randomIndex;
-            randomIndex = Math.floor(Math.random() * rightCopy.length)
-            poolOfNames
-                .find(user => leftItem.id === user.id)
-                .pairName = rightCopy[randomIndex].name
-
-                rightCopy.splice(randomIndex, 1)
-        })
-
-        right.forEach((rightItem) => {
-            let randomIndex;
-            randomIndex = Math.floor(Math.random() * leftCopy.length)
-            poolOfNames
-                .find(user => rightItem.id === user.id)
-                .pairName = leftCopy[randomIndex].name
-
-                leftCopy.splice(randomIndex, 1)
-        })
+        // pair once 
+        left.forEach(pairWithRight(right));
 
         console.log(left);
         console.log(right);
